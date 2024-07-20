@@ -1,90 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>User Registration System</title>
-        <link rel="stylesheet" href="style.css">
-    </head>
-    <body>
-        <?php
-        // Database configuration
-        $servername = "localhost";
-        $username = "root";
-        $password = "";
-        $dbname = "user_registration";
 
-        // Create connection
-        $conn = new mysqli($servername, $username, $password, $dbname);
-        
-        // Check connection
-        if ($conn->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <?php
+    // Database configuration
+    $servername = "localhost";
+    $username = "root";
+    $password = "";
+    $dbname = "user_registration";
+
+    // Create connection
+    $conn = new mysqli($servername, $username, $password, $dbname);
+
+    // Check connection
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+
+    $action = isset($_GET['action']) ? $_GET['action'] : '';
+
+
+
+    // Display the registration or login form based on the action
+    if ($action == 'show_login') {
+        displayLoginForm();
+    } else {
+        displayRegistrationForm();
+    }
+    // Handle user registration
+    if ($action == 'register' && $_SERVER['REQUEST_METHOD'] == 'POST') {
+        $username = $_POST['username'];
+        $email = $_POST['email'];
+        $password = $_POST['password'];
+
+        // Validate form data
+        if (empty($username) || empty($email) || empty($password)) {
+            die("Please fill in all fields.");
         }
-        
-        $action = isset($_GET['action']) ? $_GET['action'] : '';
-        
-        
-        
-        // Display the registration or login form based on the action
-        if ($action == 'show_login') {
-            displayLoginForm();
+
+        // Hash the password
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+        // Insert user data into the database
+        $sql = "INSERT INTO users (username, email, password) VALUES ('$username', '$email', '$hashed_password')";
+
+        if ($conn->query($sql) === TRUE) {
+            echo "<p>Registration successful! <a href='index.php?action=show_login'>Login here</a></p>";
         } else {
-            displayRegistrationForm();
+            echo "<p>Error: " . $sql . "<br>" . $conn->error . "</p>";
         }
-        // Handle user registration
-        if ($action == 'register' && $_SERVER['REQUEST_METHOD'] == 'POST') {
-            $username = $_POST['username'];
-            $email = $_POST['email'];
-            $password = $_POST['password'];
+    }
 
-            // Validate form data
-            if (empty($username) || empty($email) || empty($password)) {
-                die("Please fill in all fields.");
-            }
+    // Handle user login
+    elseif ($action == 'login' && $_SERVER['REQUEST_METHOD'] == 'POST') {
+        $username = $_POST['username'];
+        $password = $_POST['password'];
 
-            // Hash the password
-            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        // Validate form data
+        if (empty($username) || empty($password)) {
+            die("Please fill in all fields.");
+        }
 
-            // Insert user data into the database
-            $sql = "INSERT INTO users (username, email, password) VALUES ('$username', '$email', '$hashed_password')";
+        // Retrieve user data from the database
+        $sql = "SELECT * FROM users WHERE username='$username'";
+        $result = $conn->query($sql);
 
-            if ($conn->query($sql) === TRUE) {
-                echo "<p>Registration successful! <a href='index.php?action=show_login'>Login here</a></p>";
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            // Verify password
+            if (password_verify($password, $row['password'])) {
+                echo "<p>Login successful!</p>";
             } else {
-                echo "<p>Error: " . $sql . "<br>" . $conn->error . "</p>";
+                echo "<p>Invalid password.</p>";
             }
+        } else {
+            echo "<p>No user found with that username.</p>";
         }
-
-        // Handle user login
-        elseif ($action == 'login' && $_SERVER['REQUEST_METHOD'] == 'POST') {
-            $username = $_POST['username'];
-            $password = $_POST['password'];
-
-            // Validate form data
-            if (empty($username) || empty($password)) {
-                die("Please fill in all fields.");
-            }
-
-            // Retrieve user data from the database
-            $sql = "SELECT * FROM users WHERE username='$username'";
-            $result = $conn->query($sql);
-
-            if ($result->num_rows > 0) {
-                $row = $result->fetch_assoc();
-                // Verify password
-                if (password_verify($password, $row['password'])) {
-                    echo "<p>Login successful!</p>";
-                } else {
-                    echo "<p>Invalid password.</p>";
-                }
-            } else {
-                echo "<p>No user found with that username.</p>";
-            }
-        }
-        // Function to display the registration form
-        function displayRegistrationForm() {
-            echo '<header>Register new account</header>
+    }
+    // Function to display the registration form
+    function displayRegistrationForm()
+    {
+        echo '<header>Register new account</header>
             <form method="post" action="index.php?action=register">
               <fieldset>
                  <br/>
@@ -99,11 +102,12 @@
                  <input type="submit" name="submit" id="submit" value="REGISTER">
               </fieldset>
            </form>';
-        }
+    }
 
-        // Function to display the login form
-        function displayLoginForm() {
-            echo '<header>Login</header>
+    // Function to display the login form
+    function displayLoginForm()
+    {
+        echo '<header>Login</header>
             <form method="post" action="index.php?action=login">
               <fieldset>
                  <br/>
@@ -114,10 +118,11 @@
                  <input type="submit" name="submit" id="submit" value="LOGIN">
               </fieldset>
            </form>';
-        }
+    }
 
-        $conn->close();
-        ?>
-        <!-- <div id="container"></div> -->
-    </body>
+    $conn->close();
+    ?>
+    <!-- <div id="container"></div> -->
+</body>
+
 </html>
