@@ -122,7 +122,6 @@
 
     $conn->close();
     ?>
-    <!-- <div id="container"></div> -->
 </body>
 
 </html>
