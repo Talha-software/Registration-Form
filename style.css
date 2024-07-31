@@ -31,7 +31,7 @@ header {
 fieldset {
   text-align: center;
   width: 20%;
-  margin-left:40%;
+  margin-left: 40%;
   border-radius: 10px;
   border: none;
   font-size: 2rem;
@@ -62,7 +62,7 @@ input[type="submit"] {
   border: 0;
   display: block;
   width: 100%;
-  margin:-40px 0 0 0 ;
+  margin: -40px 0 0 0;
   color: white;
   padding: 0.7rem;
   cursor: pointer;
@@ -107,5 +107,8 @@ input[type="password"]:focus {
   #container {
     margin-top: 5%;
     margin-bottom: 5%;
+  }
+  header{
+    width: 270px;
   }
 }
